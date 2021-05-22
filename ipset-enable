@@ -1,0 +1,19 @@
+#!/bin/sh
+
+update-ipsets enable "$1"
+
+has_dep=true
+while $has_dep; do
+    has_dep=false
+    update-ipsets -s 2>&1 | grep "will be generated without" | while read -r line; do
+        dep=$(echo $line | awk -F "'" '{ print $2 }')
+        if [ ! -z "$dep" ]; then
+            has_dep=true
+            update-ipsets enable "$dep"
+            dep_parent=$(echo "$dep" | sed -E 's/_[0-9]+d//g')
+            if [ "$dep" != "$dep_parent" ]; then
+                update-ipsets enable "$dep_parent"
+            fi
+        fi
+    done
+done

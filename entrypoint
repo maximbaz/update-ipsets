@@ -1,0 +1,20 @@
+#!/bin/sh
+
+[ $# -gt 0 ] || {
+    echo >&2 "Usage: $0 <list1> [<list2> ...]"
+    exit 1
+}
+
+update-ipsets -r -s
+
+for list; do
+    echo "=== Enabling list: $list ==="
+    ipset-enable "$list"
+    ipset-apply "$list"
+done
+
+while true; do
+    echo "=== Updating lists... ==="
+    update-ipsets -s
+    sleep 10m
+done
